@@ -1,3 +1,5 @@
-Casey provides input files in binary, which I download from his github, then run through the NASMtoString java main class, which provides me the same input in txt files which I use to do homeworks.
+First homework was learning how the assembler decodes binary to assembly instructions, only register to register movs. Finished in Java.
 
-I find it easier to reason about it this way instead of wasting time on doing it in one function, when the point is the to understand how the CPU works, not how to parse binary files.
+Second homework was start of simulating executing the assembler instructions. Starting with basic register-immediate movs(43), adding support for register to register movs later(44).
+
+Switched to cpp to learn the language :D
