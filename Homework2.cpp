@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "shared/sim86_shared.h"
-#include "sim86_text.h"
 
 static u8* LoadMemoryFromFile(const char *filename, long int *filesize) {
     // Open the file in binary mode
@@ -52,11 +51,19 @@ int main(int argCount, char **Args)
             offset += instruction.Size;
             instruction_operand operand1 = instruction.Operands[0];
             instruction_operand operand2 = instruction.Operands[1];
-
+            
             const u16 ind = operand1.Register.Index;
-            const u16 val = operand2.Immediate.Value;
+            if(operand2.Type == Operand_Immediate)
+            {
+                const u16 val = operand2.Immediate.Value;
+                register_values[ind - 1] = val;
+            }
+            else if(operand2.Type == Operand_Register)
+            {
+                const u16 ind2 = operand2.Register.Index;
+                register_values[ind-1] = register_values[ind2-1];
+            }
 
-            register_values[ind - 1] = val;
         }
         else
         {
