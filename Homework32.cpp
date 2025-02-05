@@ -8,6 +8,8 @@ struct Node
     char* value;
     Node* sibling;
     Node* child;
+    bool isArray;
+    bool isArrayElement;
 };
 
 Node* newNode() {
@@ -16,6 +18,8 @@ Node* newNode() {
     n->value = NULL;
     n->child = NULL;
     n->sibling = NULL;
+    n->isArray = false;
+    n->isArrayElement = false;
     return n;
 }
 
@@ -79,23 +83,6 @@ Node* parseObject(char* buffer, int* counter)
     return n;
 }
 
-void PrintJson(Node* root) {
-    if (root == NULL) return;  // Base case to prevent segfault
-
-    printf("%s:", root->label);
-    printf("%s", root->value);
-
-    if (root->child != NULL) {
-        printf("{");
-        PrintJson(root->child);
-        printf("}");
-    }
-
-    if (root->sibling != NULL) {
-        printf(",");
-        PrintJson(root->sibling);
-    }
-}
 
 int main()
 {   
@@ -121,8 +108,26 @@ int main()
         {
 
         case '{':
-            stack[stackIndex++] = curr;
-            curr = curr -> child = parseObject(buffer, &counter);
+            if (curr -> isArray)
+            {   
+                Node* arrayElement = newNode();
+                arrayElement->isArrayElement = true;
+                curr->child = arrayElement;
+                curr = curr->child;
+            }
+
+            else if (curr -> isArrayElement)
+            {
+                Node* arrayElement = newNode();
+                arrayElement->isArrayElement = true;
+                curr->sibling = arrayElement;
+                curr = curr->sibling;
+            }
+            
+            stack[stackIndex] = curr;
+            stackIndex++;
+            curr -> child = parseObject(buffer, &counter);
+            curr = curr -> child;
             //skip closing " for label
             counter++;
             if (buffer[counter] != ':')
@@ -133,7 +138,10 @@ int main()
             break;
         
         case ',':
-            curr = curr -> sibling = parseObject(buffer, &counter);
+            if (curr -> isArrayElement) break;
+
+            curr -> sibling = parseObject(buffer, &counter);
+            curr = curr -> sibling;
             //skip closing " for label
             counter++;
             if (buffer[counter] != ':')
@@ -151,6 +159,24 @@ int main()
             }
             break;
 
+        case '[':
+        {
+            Node* Array = newNode();
+            Array->isArray = true;
+
+            if (curr->child == NULL) curr->child = Array;
+            else
+            {
+                curr->sibling = Array;
+                curr = curr->sibling;
+            }
+
+            stack[stackIndex] = curr;
+            stackIndex++;
+            curr = Array;
+            break;
+        }
+
         case '-':
         case '0':
         case '1':
@@ -163,12 +189,13 @@ int main()
         case '8':
         case '9':
             curr -> value = ParseNumber(buffer, &counter);
-            if (buffer[counter] == '}')
+            if (buffer[counter] == '}' || buffer[counter] == ',')
             {
                 counter--;
             }
             break;
 
+        case ']':
         case '}':
             if (stackIndex > 0) curr = stack[--stackIndex];
             break;
@@ -179,6 +206,25 @@ int main()
         counter++;
     }
 
-    PrintJson(root->child);
+
+    // Haversine goal: 7937.655392
+
+    Node* test = root->child->child->child;
+
+    while (test != NULL)
+    {
+        Node* innerCurr = test->child;
+        while (innerCurr != NULL)
+        {
+            printf(innerCurr->label);
+            printf(" : ");
+            printf(innerCurr->value);
+            printf("\n");
+            innerCurr = innerCurr -> sibling;
+        }
+        test = test->sibling;
+    }
+    
+    
     return 0;
 }
