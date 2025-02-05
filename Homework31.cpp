@@ -37,7 +37,7 @@ static double ReferenceHaversine(double X0, double Y0, double X1, double Y1, dou
 
 int main()
 {   
-    const int PointCount = 100;
+    const int PointCount = 10;
     const double EarthRadius = 6372.8;
     double sum = 0;
 
@@ -77,7 +77,7 @@ int main()
     double haversineAverage = sum / PointCount*2;
     printf("The haversine average of this generator is: %f\n", haversineAverage);
 
-    fprintf(fptr, "\t]");
+    fprintf(fptr, "]");
     fprintf(fptr, "}");
     fclose(fptr);
     return 0;
